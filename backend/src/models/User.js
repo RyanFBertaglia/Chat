@@ -20,7 +20,7 @@ class User {
     }
 
     static async findById(id) {
-        const query = 'SELECT * FROM users WHERE id = ?';
+        const query = 'SELECT * FROM users WHERE id = ? limit 1';
         const [rows] = await pool.execute(query, [id]);
         return rows[0];
     }
