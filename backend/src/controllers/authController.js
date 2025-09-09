@@ -4,7 +4,7 @@ const authController = {
   async login(req, res) {
     try {
       const { email, password } = req.body;
-            const result = await authService.login(email, password);
+            const result = await authService.login(nome, password);
       
       res.json(result);
       
