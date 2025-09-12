@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Conexão WebSocket</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #fdbb2d;
+        }
+        
+        .status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .status-indicator {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .disconnected {
+            background: #ff4d4d;
+        }
+        
+        .connected {
+            background: #00cc66;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        input, button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        button {
+            background: #fdbb2d;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #ffcc44;
+        }
+        
+        button:disabled {
+            background: #777;
+            cursor: not-allowed;
+        }
+        
+        .messages {
+            height: 300px;
+            overflow-y: auto;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .message {
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-radius: 5px;
+            max-width: 80%;
+            word-break: break-word;
+        }
+        
+        .sent {
+            background: rgba(253, 187, 45, 0.3);
+            align-self: flex-end;
+            text-align: right;
+        }
+        
+        .received {
+            background: rgba(0, 204, 102, 0.3);
+            align-self: flex-start;
+        }
+        
+        .info {
+            background: rgba(26, 42, 108, 0.3);
+            align-self: center;
+            text-align: center;
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+        
+        h2 {
+            margin-bottom: 10px;
+            color: #fdbb2d;
+        }
+        
+        ul {
+            padding-left: 20px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        @media (max-width: 600px) {
+            .controls {
+                flex-direction: column;
+            }
+            
+            input, button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Teste de Conexão WebSocket</h1>
+            <p>Conecte-se a um servidor WebSocket local na porta 3000</p>
+        </header>
+        
+        <div class="status">
+            <div class="status-indicator disconnected" id="status-indicator"></div>
+            <span id="status-text">Desconectado</span>
+        </div>
+        
+        <div class="controls">
+            <input type="text" id="server-url" value="ws://localhost:3000" placeholder="URL do WebSocket">
+            <button id="connect-btn">Conectar</button>
+            <button id="disconnect-btn" disabled>Desconectar</button>
+        </div>
+        
+        <div class="controls">
+            <input type="text" id="message-input" placeholder="Digite uma mensagem para enviar" disabled>
+            <button id="send-btn" disabled>Enviar</button>
+        </div>
+        
+        <div class="messages" id="messages"></div>
+        
+        <div class="instructions">
+            <h2>Instruções:</h2>
+            <ul>
+                <li>Certifique-se de que o servidor WebSocket está rodando em <code>ws://localhost:3000</code></li>
+                <li>Clique em "Conectar" para estabelecer a conexão</li>
+                <li>Após conectar, você pode enviar mensagens para o servidor</li>
+                <li>Mensagens recebidas do servidor aparecerão abaixo</li>
+                <li>Use "Desconectar" para fechar a conexão</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const serverUrlInput = document.getElementById('server-url');
+    const connectBtn = document.getElementById('connect-btn');
+    const disconnectBtn = document.getElementById('disconnect-btn');
+    const messageInput = document.getElementById('message-input');
+    const sendBtn = document.getElementById('send-btn');
+    const messagesContainer = document.getElementById('messages');
+    const statusIndicator = document.getElementById('status-indicator');
+    const statusText = document.getElementById('status-text');
+    
+    let socket = null;
+
+    function updateUI(connected) {
+        if (connected) {
+            statusIndicator.classList.replace('disconnected', 'connected');
+            statusText.textContent = 'Conectado';
+            connectBtn.disabled = true;
+            disconnectBtn.disabled = false;
+            messageInput.disabled = false;
+            sendBtn.disabled = false;
+        } else {
+            statusIndicator.classList.replace('connected', 'disconnected');
+            statusText.textContent = 'Desconectado';
+            connectBtn.disabled = false;
+            disconnectBtn.disabled = true;
+            messageInput.disabled = true;
+            sendBtn.disabled = true;
+        }
+    }
+
+    function addMessage(text, type) {
+        const messageEl = document.createElement('div');
+        messageEl.classList.add('message', type);
+        messageEl.textContent = text;
+        messagesContainer.appendChild(messageEl);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function connect() {
+        const url = serverUrlInput.value || "http://localhost:3000";
+        
+        socket = io(url);
+
+        socket.on("connect", () => {
+            addMessage('Conexão estabelecida com sucesso!', 'info');
+            updateUI(true);
+        });
+
+        socket.on("disconnect", () => {
+            addMessage('Conexão fechada.', 'info');
+            updateUI(false);
+        });
+
+        socket.on("connect_error", (err) => {
+            addMessage(`Erro de conexão: ${err.message}`, 'info');
+            updateUI(false);
+        });
+
+        socket.on("new_message", (msg) => {
+            addMessage(`Recebido: ${msg.content}`, 'received');
+        });
+    }
+
+    function disconnect() {
+        if (socket) {
+            socket.disconnect();
+            socket = null;
+        }
+    }
+
+    function sendMessage() {
+        const message = messageInput.value;
+        if (message && socket && socket.connected) {
+            socket.emit("send_message", { userId: 1, content: message });
+            addMessage(`Enviado: ${message}`, 'sent');
+            messageInput.value = '';
+        }
+    }
+
+    connectBtn.addEventListener('click', connect);
+    disconnectBtn.addEventListener('click', disconnect);
+    sendBtn.addEventListener('click', sendMessage);
+
+    messageInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') sendMessage();
+    });
+
+    updateUI(false);
+    addMessage('Digite a URL do servidor e clique em Conectar para iniciar.', 'info');
+});
+</script>
+
+</body>
+</html>
