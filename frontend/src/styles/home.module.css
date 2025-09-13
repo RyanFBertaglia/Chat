@@ -1,0 +1,52 @@
+.botoes button {
+    background-color: #5f6a72;
+    border: 1px solid black;
+    padding: 30px;
+}
+.botoes {
+    display: grid;  
+    align-items: center;
+    gap: 20px;
+}
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modalContent {
+  width: 80%;
+  max-width: 400px;
+  background-color: blue;
+  border-radius: 12px;
+  padding: 20px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.modalContent h2 {
+  text-align: center;
+}
+
+.modalContent form {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+}
+
+.modalContent form input {
+  width: 100%;
+}
+.modalContent form button {
+  width: 100%;
+}
