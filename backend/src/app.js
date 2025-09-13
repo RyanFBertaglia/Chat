@@ -3,7 +3,8 @@ const http = require('http');
 const socketIo = require('socket.io');
 const path = require('path');
 const commentService = require('./services/commentService');
-
+const authService = require('./services/authService');
+const cors = require('cors');
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
@@ -13,8 +14,46 @@ const io = socketIo(server, {
   }
 });
 
+
+app.use(cors({
+  origin: "http://localhost:5173",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.post('/api/register', async (req, res) => {
+  try {
+    const user = req.body;
+    console.log(user);
+    const result = await authService.createUser(user.name, user.password);
+    res.status(201).json(result);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.post('/api/login', async (req, res) => {
+  try {
+    const { name, password } = req.body;
+    const result = await authService.authenticateUser(name, password);
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.post('/api/login-temporario', async (req, res) => {
+  try {
+    const result = await authService.createTemporaryUser();
+    res.status(201).json(result);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 
 app.get('/api/messages', async (req, res) => {
   try {
@@ -34,7 +73,7 @@ io.on('connection', (socket) => {
         data.userId,
         data.content,
         data.message_type || 'text',
-        data.nome || null
+        data.name || null
       );
       io.emit('new_message', message);
     } catch (err) {
