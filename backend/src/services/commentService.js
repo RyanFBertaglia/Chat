@@ -9,28 +9,30 @@ class CommentService {
                 [userId, content, messageType]
             );
 
-            let messages;
+            let message;
 
-            if(!nome) {
-                [messages] = await connection.execute(`
+            if (!nome) {
+                const [messages] = await connection.execute(`
                     SELECT m.*, u.name as user_name 
                     FROM message m 
                     JOIN user u ON m.idUser = u.id 
                     WHERE m.id = ?
                 `, [result.insertId]);
+                message = messages[0];
             } else {
-                messages = [{
-                    id: result.insertId,
-                    idUser: userId,
-                    content: content,
-                    message_type: messageType,
+                const [messages] = await connection.execute(`
+                    SELECT * FROM message WHERE id = ?
+                `, [result.insertId]);
+                
+                message = {
+                    ...messages[0],
                     user_name: nome,
-                    created_at: new Date()
-                }];
-                console.log("retornou", messages[0]);
+                    name: nome
+                };
             }
 
-            return messages[0];
+            console.log("Mensagem retornada:", message);
+            return message;
         } catch (err) {
             throw err;
         } finally {
@@ -42,7 +44,7 @@ class CommentService {
         const connection = await db.getConnection();
         try {
             const [messages] = await connection.execute(`
-                SELECT m.*, u.name as user_name 
+                SELECT m.*, u.name as user_name, u.name as name
                 FROM message m 
                 JOIN user u ON m.idUser = u.id 
                 ORDER BY m.created_at DESC 
