@@ -3,7 +3,7 @@ const authService = require('../services/authService');
 const authController = {
   async login(req, res) {
     try {
-      const { email, password } = req.body;
+      const { nome, password } = req.body;
             const result = await authService.login(nome, password);
       
       res.json(result);

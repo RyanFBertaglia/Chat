@@ -9,7 +9,19 @@ export default function TempLoginForm({ onClose }) {
     const { createTemporaryUser } = useAuth();
     const formRef = useRef(null);
 
-    
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (formRef.current && !formRef.current.contains(event.target)) {
+                onClose();
+            }
+        }
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [onClose]);
+
 
 
     const handleSubmit = async (e) => {
@@ -29,7 +41,7 @@ export default function TempLoginForm({ onClose }) {
 
     return (
         <div className={styles.modalOverlay} >
-            <div className={styles.modalContent}>
+            <div className={styles.modalContent} ref={formRef}>
                 <h2>Continuar sem conta</h2>
                 {error && <div className={styles.errorMessage}>{error}</div>}
                 <form onSubmit={handleSubmit}>

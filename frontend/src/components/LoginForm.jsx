@@ -1,6 +1,6 @@
 import styles from '../styles/home.module.css';
 import { useAuth } from '../services/authService';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export default function LoginForm({ onClose }) {
     const [nome, setNome] = useState('');
@@ -9,6 +9,37 @@ export default function LoginForm({ onClose }) {
     const [error, setError] = useState('');
     const [isLogin, setIsLogin] = useState(true);
     const { login, register } = useAuth();
+    const formRef = useRef(null);
+    const [dots, setDots] = useState('');
+
+
+
+    useEffect(() => {
+            function handleClickOutside(event) {
+                if (formRef.current && !formRef.current.contains(event.target)) {
+                    onClose();
+                }
+            }
+    
+            document.addEventListener("mousedown", handleClickOutside);
+            return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+            };
+        }, [onClose]);
+    
+    useEffect(() => {
+    if (!isLoading) {
+        setDots('');
+        return;
+    }
+
+    const interval = setInterval(() => {
+        setDots(prev => (prev.length < 3 ? prev + '.' : ''));
+    }, 500);
+
+    return () => clearInterval(interval);
+    }, [isLoading]);
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -30,11 +61,12 @@ export default function LoginForm({ onClose }) {
         }finally {
             setIsLoading(false);
         }
+    
     };
 
     return (
         <div className={styles.modalOverlay}>
-            <div className={styles.modalContent}>
+            <div className={styles.modalContent} ref={formRef}>
                 <h2>{isLogin ? 'Login' : 'Registrar'}</h2>
                 {error && <div className={styles.errorMessage}>{error}</div>}
                 <form onSubmit={handleSubmit}>
@@ -59,7 +91,7 @@ export default function LoginForm({ onClose }) {
                         flexDirection: 'column'
                     }}>
                         <button type="submit" disabled={isLoading}>
-                            {isLoading ? 'Carregando...' : (isLogin ? 'Entrar' : 'Registrar')}
+                            {isLoading ? `Carregando${dots}` : (isLogin ? 'Entrar' : 'Registrar')}
                         </button>
                         
                         <button type="button" onClick={() => setIsLogin(!isLogin)} disabled={isLoading}>
