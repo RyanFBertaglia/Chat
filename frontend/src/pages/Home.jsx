@@ -1,12 +1,26 @@
-import styles from '../styles/home.module.css'
+import styles from '../styles/home.module.css';
 import LoginForm from '../components/LoginForm';
-import TempLoginForm from '../components/TempLoginForm'
-import { useState } from 'react';
-
+import TempLoginForm from '../components/TempLoginForm';
+import { useState, useEffect } from 'react';
+import { useNavigate } from "react-router-dom";
+import { useAuth } from '../services/authService';
 
 export default function Home() {
     const [showFormLogin, setShowFormLogin] = useState(false);
     const [showTempFormLogin, setShowTempFormLogin] = useState(false);
+    const { isAuthenticated, isInitializing } = useAuth();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!isInitializing && isAuthenticated) {
+            navigate("/chat", { replace: true });
+            window.location.reload();
+        }
+    }, [isAuthenticated, isInitializing, navigate]);
+
+    if (isInitializing) {
+        return <div>Carregando...</div>;
+    }
 
     return (
     <div className="container">

@@ -142,3 +142,9 @@ button:disabled {
   padding: 20px;
   color: #6b7280;
 }
+
+.message div {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}

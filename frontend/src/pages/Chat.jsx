@@ -4,7 +4,7 @@ import { useAuth } from '../services/authService';
 import "../App.css";
 
 export default function Chat() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
@@ -73,7 +73,6 @@ export default function Chat() {
         message_type: "text",
       };
 
-      // Mostra no chat imediatamente (otimista)
       const tempMessage = {
         id: `temp-${Date.now()}`,
         idUser: user.id,
@@ -157,6 +156,9 @@ export default function Chat() {
             }`}
           ></span>
           {isConnected ? "Conectado" : "Desconectado"} | Seu ID: {user?.id || 'N/A'}
+          <button className="logout-btn" onClick={logout} style={{marginLeft: '80px'}}>
+            <i className="fa fa-sign-out" aria-hidden="true"></i> Logout
+          </button>
         </div>
       </div>
 
