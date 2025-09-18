@@ -47,7 +47,8 @@ app.post('/api/login', async (req, res) => {
 
 app.post('/api/login-temporario', async (req, res) => {
   try {
-    const result = await authService.createTemporaryUser();
+    const { name } = req.body;
+    const result = await authService.createTemporaryUser(name);
     res.status(201).json(result);
   } catch (err) {
     res.status(400).json({ error: err.message });
