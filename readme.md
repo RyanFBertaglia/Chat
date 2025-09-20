@@ -21,7 +21,7 @@ Projeto dividido em **frontend (React)** e **backend (Node.js/Express + Socket.i
 
 ---
 ## Rotas
-![Rotas](frontend/public/schema.png | width=120)
+![Rotas](./frontend/public/schema.png)
 
 
 ---
@@ -48,7 +48,7 @@ npm run dev
 npm run dev
 npm start
 ```
-![App desktop](frontend/public/app.png | width=120)
+![App desktop](frontend/public/app.png)
 
 ## Autor
 - [@Ryan Fernandes Bertaglia](https://github.com/RyanFBertaglia/)
