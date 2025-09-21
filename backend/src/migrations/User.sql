@@ -1,13 +1,11 @@
 CREATE TABLE user (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100),
-    password_hash VARCHAR(255),
-
-    -- identifica se é usuário temporário ou permanente
-    is_temporary BOOLEAN DEFAULT FALSE,
-
-    -- data de expiração só usada para temporários
+    id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
+    name VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    is_temporary TINYINT(1) DEFAULT 0,
     expires_at DATETIME NULL,
-
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+
+
