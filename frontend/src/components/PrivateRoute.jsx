@@ -5,7 +5,7 @@ export default function PrivateRoute({ children }) {
   const { isAuthenticated, isInitializing } = useAuth();
 
   if (isInitializing) {
-    return null; // ou um spinner enquanto carrega
+    return null;
   }
 
   if (!isAuthenticated) {
