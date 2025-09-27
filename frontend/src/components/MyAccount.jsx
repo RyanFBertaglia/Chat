@@ -1,5 +1,5 @@
 import styles from '../styles/account.module.css';
-import { useAuth } from '../services/authService';
+import { useAuth } from '../services/useAuth';
 import React, { useState } from "react";
 
 

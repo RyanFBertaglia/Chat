@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useContext } from "react";
 import io from "socket.io-client";
-import { useAuth } from '../services/authService';
+import { useAuth } from '../services/useAuth';
 import "../App.css";
 
 export default function Chat() {

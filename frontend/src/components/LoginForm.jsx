@@ -1,5 +1,5 @@
 import styles from '../styles/home.module.css';
-import { useAuth } from '../services/authService';
+import { useAuth } from '../services/useAuth';
 import { useState, useEffect, useRef } from 'react';
 
 export default function LoginForm({ onClose }) {

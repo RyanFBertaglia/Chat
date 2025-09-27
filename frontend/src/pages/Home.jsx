@@ -3,7 +3,7 @@ import LoginForm from '../components/LoginForm';
 import TempLoginForm from '../components/TempLoginForm';
 import { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
-import { useAuth } from '../services/authService';
+import { useAuth } from '../services/useAuth';
 
 export default function Home() {
     const [showFormLogin, setShowFormLogin] = useState(false);
