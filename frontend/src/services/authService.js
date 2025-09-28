@@ -1,7 +1,6 @@
-import { AuthContext } from "../AuthContext";
 import { useState, useEffect, useRef, useContext } from 'react';
 
-class AuthService {
+export default class AuthService {
     constructor() {
         this.baseUrl = 'http://localhost:3000/api';
     }
@@ -75,6 +74,55 @@ class AuthService {
         }
     }
 
+    async uploadUserPhoto(userId, file) {
+        try {
+            const formData = new FormData();
+            formData.append('photo', file);
+
+            const response = await fetch(`${this.baseUrl}/user/${userId}/photo`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${this.getStoredInfo().token}`
+                },
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error('Erro ao fazer upload da foto');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Erro no upload:', error);
+            throw error;
+        }
+    }
+
+    async deleteUserPhoto(userId) {
+        try {
+            const response = await fetch(`${this.baseUrl}/user/${userId}/photo`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${this.getStoredInfo().token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Erro ao deletar foto');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Erro ao deletar foto:', error);
+            throw error;
+        }
+    }
+
+    getUserPhotoUrl(userId) {
+        return `${this.baseUrl}/uploads/user_${userId}_*.jpg`;
+    }
+
     saveInfo(authData) {
         if (authData && authData.token) {
             localStorage.setItem('authToken', authData.token);
@@ -97,7 +145,3 @@ class AuthService {
         localStorage.removeItem('userInfo');
     }
 }
-
-
-
-export default AuthService;

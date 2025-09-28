@@ -9,6 +9,7 @@ export const AuthProvider = ({ children }) => {
     id: null,
     name: "",
     token: null,
+    photoUrl: null,
     is_temporary: false,
     expires_at: null,
     created_at: null
@@ -24,19 +25,20 @@ export const AuthProvider = ({ children }) => {
       setUser({
         ...stored.user,
         token: stored.token,
-        isLogged: true
+        isLogged: true,
+        photoUrl: stored.user.photo_url || null
       });
     }
     setIsInitializing(false);
   }, []);
 
-  // Recebe o objeto bruto do backend e normaliza isLogged
   const login = (userData) => {
     setUser({
       isLogged: true,
       id: userData.id ?? userData.user?.id ?? null,
       name: userData.name ?? userData.user?.name ?? "",
       token: userData.token ?? null,
+      photoUrl: userData.photo_url ?? userData.user?.photo_url ?? null, // Capture a photo_url
       is_temporary: userData.is_temporary ?? userData.user?.is_temporary ?? false,
       expires_at: userData.expires_at ?? userData.user?.expires_at ?? null,
       created_at: userData.created_at ?? userData.user?.created_at ?? null
@@ -51,6 +53,7 @@ export const AuthProvider = ({ children }) => {
       id: null,
       name: "",
       token: null,
+      photoUrl: null,
       is_temporary: false,
       expires_at: null,
       created_at: null
