@@ -3,8 +3,13 @@ const db = require('../config/database');
 const { generateToken } = require('../middleware/auth');
 const { v4: uuidv4 } = require('uuid');
 const crypto = require('crypto');
+const PhotoService = require('./photoService');
 
 class AuthService {
+  constructor() {
+    this.photoService = new PhotoService();
+  }
+
   async createUser(name, password, isTemporary = false) {
     const saltRounds = isTemporary ? 8 : 12;
     const userId = uuidv4();
@@ -23,6 +28,7 @@ class AuthService {
       ).catch(console.error);
     });
 
+    const photoUrl = await this.photoService.getUserPhotoURL(userId);
     const token = generateToken(userId);
 
     return {
@@ -31,7 +37,8 @@ class AuthService {
         name,
         is_temporary: isTemporary ? 1 : 0,
         expires_at: expiresAt,
-        created_at: new Date()
+        created_at: new Date(),
+        photo_url: photoUrl
       },
       token
     };
@@ -65,45 +72,71 @@ class AuthService {
     }
   }
 
-    async authenticateUser(name, password) {
-            const connection = await db.getConnection();
-            try {
-                const [users] = await connection.execute(
-                    'SELECT id, name, password_hash, is_temporary, expires_at FROM user WHERE name = ?',
-                    [name]
-                );
+  async authenticateUser(name, password) {
+    const connection = await db.getConnection();
+    try {
+      const [users] = await connection.execute(
+        'SELECT id, name, password_hash, is_temporary, expires_at FROM user WHERE name = ?',
+        [name]
+      );
 
-                if (users.length === 0) {
-                    throw new Error('Usuário não encontrado');
-                }
+      if (users.length === 0) {
+        throw new Error('Usuário não encontrado');
+      }
 
-                const user = users[0];
+      const user = users[0];
 
-                if (user.is_temporary && new Date() > new Date(user.expires_at)) {
-                    throw new Error('Sessão expirada');
-                }
+      if (user.is_temporary && new Date() > new Date(user.expires_at)) {
+        throw new Error('Sessão expirada');
+      }
 
-                const isValidPassword = await bcrypt.compare(password, user.password_hash);
-                if (!isValidPassword) {
-                    throw new Error('Senha incorreta');
-                }
+      const isValidPassword = await bcrypt.compare(password, user.password_hash);
+      if (!isValidPassword) {
+        throw new Error('Senha incorreta');
+      }
 
-                const token = generateToken(user.id);
+      const photoUrl = await this.photoService.getUserPhotoURL(user.id);
 
-                return {
-                    user: {
-                        id: user.id,
-                        name: user.name,
-                        is_temporary: user.is_temporary,
-                        expires_at: user.expires_at
-                    },
-                    token
-                };
-            } finally {
-                connection.release();
-            }
-        }
+      const token = generateToken(user.id);
 
+      return {
+        user: {
+          id: user.id,
+          name: user.name,
+          is_temporary: user.is_temporary,
+          expires_at: user.expires_at,
+          photo_url: photoUrl
+        },
+        token
+      };
+    } finally {
+      connection.release();
     }
+  }
+
+  async getUserWithPhoto(userId) {
+    try {
+      const [users] = await db.execute(
+        'SELECT id, name, is_temporary, expires_at FROM user WHERE id = ?',
+        [userId]
+      );
+
+      if (users.length === 0) {
+        return null;
+      }
+
+      const user = users[0];
+      const photoUrl = await this.photoService.getUserPhotoURL(userId);
+
+      return {
+        ...user,
+        photo_url: photoUrl
+      };
+    } catch (error) {
+      console.error('Erro ao buscar usuário com foto:', error);
+      return null;
+    }
+  }
+}
 
 module.exports = new AuthService();

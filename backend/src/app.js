@@ -7,7 +7,10 @@ const multer = require('multer');
 
 const commentService = require('./services/commentService');
 const authService = require('./services/authService');
-const photoService = require('./services/photoService');
+
+const PhotoService = require('./services/photoService');
+const photoService = new PhotoService();
+
 
 const app = express();
 const server = http.createServer(app);
@@ -93,7 +96,26 @@ app.post('/api/user/:userId/photo', upload.single('photo'), async (req, res) => 
     const result = await photoService.setUserPhoto(userId, req.file.buffer);
     if (result.success) {
         res.json({
+            success: true,
             message: 'Foto salva com sucesso!',
+            data: result
+        });
+    } else {
+        res.status(400).json({ error: result.error });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/user/:userId/photo', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const result = await photoService.deleteUserPhoto(userId);
+    if (result.success) {
+        res.json({
+            success: true,
+            message: 'Fotos removidas com sucesso!',
             data: result
         });
     } else {
@@ -111,6 +133,7 @@ app.get('/api/user/:userId/photo', async (req, res) => {
 
     if (result.success) {
       res.json({
+        success: true,
         message: 'Foto encontrada',
         data: result
       });

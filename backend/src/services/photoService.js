@@ -114,6 +114,24 @@ class PhotoService {
             };
         }
     }
+    async getUserPhotoURL(userId) {
+        try {
+            const files = await fs.readdir(this.uploadDir);
+            const userFiles = files.filter(file => file.startsWith(`user_${userId}_`));
+            
+            if (userFiles.length === 0) {
+                return null;
+            }
+
+            // Foto mais recente
+            const latestPhoto = userFiles.sort().reverse()[0];
+            return `/uploads/${latestPhoto}`;
+        } catch (error) {
+            console.error('Erro ao buscar URL da foto:', error);
+            return null;
+        }
+    }
+
 }
 
-module.exports = new PhotoService();
+module.exports = PhotoService;
