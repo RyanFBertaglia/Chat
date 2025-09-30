@@ -1,24 +1,125 @@
-import { useState, useEffect, useRef, useContext } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import io from "socket.io-client";
 import { useAuth } from '../services/useAuth';
+import { useNavigate } from "react-router-dom";
+import MyAccount from "../components/MyAccount";
 import "../App.css";
+
+const backendUrl = "http://localhost:3000";
+const photoCache = new Map();
+
+function MessageItem({ message, currentUserId, getUserPhoto }) {
+  const [photoUrl, setPhotoUrl] = useState("/default.png");
+
+  // CORREÇÃO: Usar idUser que vem do servidor (base de dados)
+  const messageUserId = message.idUser || message.userId || "unknown";
+  const messageContent = message.content || "";
+  const userName = message.name || message.user_name || "Usuário desconhecido";
+  const messageDate = message.created_at || message.createdAt || message.timestamp || new Date();
+
+  useEffect(() => {
+    let mounted = true;
+
+    // Só busca foto se tiver um ID válido
+    if (messageUserId && messageUserId !== "unknown") {
+      getUserPhoto(messageUserId).then((url) => {
+        if (mounted) setPhotoUrl(url);
+      });
+    }
+
+    return () => { mounted = false };
+  }, [messageUserId, getUserPhoto]);
+
+  const formatDate = (dateString) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return new Date().toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
+  };
+
+  return (
+    <div className={`message ${messageUserId === currentUserId ? "user" : "other"}`}>
+      <div className="message-header">
+        <img
+          src={photoUrl}
+          alt="Foto do usuário"
+          className="user-photo"
+          onError={(e) => {
+            e.target.src = "/default.png";
+          }}
+        />
+        <div className="user-id">{userName}</div>
+      </div>
+      <div>{messageContent}</div>
+      <div className="timestamp">{formatDate(messageDate)}</div>
+    </div>
+  );
+}
 
 export default function Chat() {
   const { user, logout } = useAuth();
   const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
+  const [showMyAccount, setShowMyAccount] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const chatContainerRef = useRef(null);
+  const navigate = useNavigate();
+
+  // CORREÇÃO: Função simplificada e estável para buscar fotos
+  const getUserPhoto = useCallback(async (userId) => {
+    if (!userId || userId === "unknown" || userId === "null" || userId === "undefined") {
+      return "/default.png";
+    }
+
+    if (photoCache.has(userId)) {
+      return photoCache.get(userId);
+    }
+
+    try {
+      const response = await fetch(`${backendUrl}/api/user/${userId}/photo`);
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          photoCache.set(userId, "/default.png");
+          return "/default.png";
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success && data.data?.url) {
+        const fullUrl = `${backendUrl}${data.data.url}`;
+        photoCache.set(userId, fullUrl);
+        return fullUrl;
+      } else {
+        throw new Error("Formato de resposta inválido da API");
+      }
+    } catch (error) {
+      console.error(`Erro ao buscar foto do usuário ${userId}:`, error.message);
+      photoCache.set(userId, "/default.png");
+      return "/default.png";
+    }
+  }, []);
 
   useEffect(() => {
-    const newSocket = io("http://localhost:3000", {
+    const newSocket = io(backendUrl, {
       transports: ["websocket", "polling"],
     });
 
     setSocket(newSocket);
 
-    fetch("http://localhost:3000/api/messages")
+    // Buscar mensagens iniciais
+    fetch(`${backendUrl}/api/messages`)
       .then((response) => response.json())
       .then((data) => {
         const validMessages = data.filter(msg => msg && typeof msg === 'object');
@@ -41,14 +142,13 @@ export default function Chat() {
         setMessages((prev) => {
           const exists = prev.some(
             (msg) =>
-              msg.id === message.id || 
+              msg.id === message.id ||
               (msg.isTemporary && msg.content === message.content && msg.userId === message.userId)
           );
           return exists ? prev : [...prev, message];
         });
       }
     });
-
 
     newSocket.on("error", (error) => {
       console.error("Erro no socket:", error);
@@ -59,13 +159,13 @@ export default function Chat() {
 
   useEffect(() => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop =
-        chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [messages]);
 
   const sendMessage = () => {
     if (inputMessage.trim() && socket && user?.id) {
+      console.log(`user= ${user.id}`);
       const messageData = {
         userId: user.id,
         content: inputMessage.trim(),
@@ -75,7 +175,7 @@ export default function Chat() {
 
       const tempMessage = {
         id: `temp-${Date.now()}`,
-        idUser: user.id,
+        idUser: user.id, // Usar o ID real do usuário
         content: inputMessage.trim(),
         name: user.name,
         created_at: new Date().toISOString(),
@@ -83,7 +183,6 @@ export default function Chat() {
       };
 
       setMessages((prev) => [...prev, tempMessage]);
-
       socket.emit("send_message", messageData);
       setInputMessage("");
     }
@@ -92,21 +191,6 @@ export default function Chat() {
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
       sendMessage();
-    }
-  };
-
-  const formatDate = (dateString) => {
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleTimeString("pt-BR", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    } catch {
-      return new Date().toLocaleTimeString("pt-BR", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
     }
   };
 
@@ -124,23 +208,13 @@ export default function Chat() {
         return null;
       }
 
-      const messageUserId = message.userId || message.idUser || "unknown";
-      const messageContent = message.content || "";
-      const userName = message.name || message.user_name || "Usuário desconhecido";
-      const messageDate =
-        message.created_at || message.createdAt || message.timestamp || new Date();
-
       return (
-        <div
-          key={message.id || index}
-          className={`message ${messageUserId === user?.id ? "user" : "other"}`}
-        >
-          <div className="user-id">
-            {userName} {message.isTemporary}
-          </div>
-          <div>{messageContent}</div>
-          <div className="timestamp">{formatDate(messageDate)}</div>
-        </div>
+        <MessageItem
+          key={message.id || `message-${index}`}
+          message={message}
+          currentUserId={user?.id}
+          getUserPhoto={getUserPhoto}
+        />
       );
     });
   };
@@ -155,9 +229,12 @@ export default function Chat() {
               isConnected ? "connected" : "disconnected"
             }`}
           ></span>
-          {isConnected ? "Conectado" : "Desconectado"} | Seu ID: {user?.id || 'N/A'}
-          <button className="logout-btn" onClick={logout} style={{marginLeft: '80px'}}>
+          {isConnected ? "Conectado" : "Desconectado"}
+          <button className="logout-btn" onClick={logout} style={{marginLeft: '200px'}}>
             <i className="fa fa-sign-out" aria-hidden="true"></i> Logout
+          </button>
+          <button className="logout-btn" onClick={() => setShowMyAccount(true)} style={{marginLeft: '20px'}}>
+            <i className="fa fa-user" aria-hidden="true"></i> Minha Conta
           </button>
         </div>
       </div>
@@ -179,6 +256,7 @@ export default function Chat() {
           Enviar
         </button>
       </div>
+      {showMyAccount && <MyAccount onClose={() => setShowMyAccount(false)} />}
     </div>
   );
 }

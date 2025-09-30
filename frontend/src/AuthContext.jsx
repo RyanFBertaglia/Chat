@@ -17,6 +17,16 @@ export const AuthProvider = ({ children }) => {
 
   const [isInitializing, setIsInitializing] = useState(true);
 
+  // Função para formatar URL da foto
+  const formatPhotoUrl = (photoUrl) => {
+    if (!photoUrl) return null;
+    const hasTimestamp = photoUrl.includes('?t=');
+    if (hasTimestamp) return photoUrl;
+    
+    const separator = photoUrl.includes('?') ? '&' : '?';
+    return `${photoUrl}${separator}t=${Date.now()}`;
+  };
+
   useEffect(() => {
     const authService = new AuthService();
     const stored = authService.getStoredInfo();
@@ -26,23 +36,25 @@ export const AuthProvider = ({ children }) => {
         ...stored.user,
         token: stored.token,
         isLogged: true,
-        photoUrl: stored.user.photo_url || null
+        photoUrl: formatPhotoUrl(stored.user.photo_url || stored.user.photoUrl)
       });
     }
     setIsInitializing(false);
   }, []);
 
   const login = (userData) => {
-    setUser({
+    const formattedUser = {
       isLogged: true,
       id: userData.id ?? userData.user?.id ?? null,
       name: userData.name ?? userData.user?.name ?? "",
       token: userData.token ?? null,
-      photoUrl: userData.photo_url ?? userData.user?.photo_url ?? null, // Capture a photo_url
+      photoUrl: formatPhotoUrl(userData.photoUrl || userData.photo_url || userData.user?.photoUrl || userData.user?.photo_url),
       is_temporary: userData.is_temporary ?? userData.user?.is_temporary ?? false,
       expires_at: userData.expires_at ?? userData.user?.expires_at ?? null,
       created_at: userData.created_at ?? userData.user?.created_at ?? null
-    });
+    };
+
+    setUser(formattedUser);
   };
 
   const logout = () => {
@@ -61,7 +73,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isInitializing }}>
+    <AuthContext.Provider value={{ user, setUser, login, logout, isInitializing }}>
       {children}
     </AuthContext.Provider>
   );
