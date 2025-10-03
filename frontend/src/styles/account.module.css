@@ -1,24 +1,127 @@
 .container {
-    background-color: rgb(118, 240, 240);
-    border-radius: 12px;
-    align-self: center;
-}
-.logout{
-    background-color: rgb(216, 68, 68);
-}
-.logout:hover {
-    background-color: rgb(199, 58, 58);
-}
-fechar {
-    background-color:cadetblue;
-}
-.foto {
-    width: 100px;
-    height: 100px;
-}
-.hasImg {
-    width: 300px;
-    height: 300px;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
 }
 
+.photoSection {
+    margin: 20px 0;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
 
+.previewContainer {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.previewContainer img {
+    max-width: 300px;
+    max-height: 300px;
+    border-radius: 8px;
+    border: 2px dashed #ccc;
+}
+
+.previewContainer .hasImg {
+    border: 2px solid #4CAF50;
+}
+
+.previewContainer .noImg {
+    opacity: 0.5;
+}
+
+.controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.uploadControls {
+    display: flex;
+    gap: 10px;
+}
+
+.uploadBtn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.uploadBtn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.cancelBtn {
+    background-color: #f44336;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.deleteBtn {
+    background-color: #ff9800;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.message {
+    padding: 10px;
+    border-radius: 4px;
+    margin: 10px 0;
+}
+
+.message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.info {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.container {
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;        /* limite de altura */
+  overflow-y: auto;        /* ativa scroll interno */
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  position: relative;
+}
