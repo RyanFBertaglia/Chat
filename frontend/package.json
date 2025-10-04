@@ -1,5 +1,5 @@
 {
-  "name": "frontend",
+  "name": "chat",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,10 +10,11 @@
     "lint": "eslint .",
     "start": "electron .",
     "electron": "electron .",
-    "dist": "electron-builder",
+    "dist": "npm run build && electron-builder",
     "preview": "vite preview"
   },
   "dependencies": {
+    "electron-updater": "^6.6.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.9.1",
@@ -33,7 +34,7 @@
     "vite": "^7.1.2"
   },
   "build": {
-    "appId": "com.seuapp.react",
+    "appId": "com.chat.FrontendApp",
     "productName": "FrontendApp",
     "directories": {
       "output": "release"
@@ -44,7 +45,8 @@
       "package.json"
     ],
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "public/messages.ico"
     }
   }
 }

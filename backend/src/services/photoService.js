@@ -78,7 +78,6 @@ class PhotoService {
             return {
                 success: true,
                 filename: latestPhoto,
-                buffer,
                 size: stats.size,
                 lastModified: stats.mtime,
                 url: `/uploads/${latestPhoto}`

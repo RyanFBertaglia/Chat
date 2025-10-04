@@ -1,4 +1,5 @@
 backend/node_modules
+frontend/release
 frontend/node_modules
 annotations.txt
 node_modules

@@ -155,6 +155,39 @@ export const useAuth = () => {
     }
   }, [contextLogin]);
 
+  const getUserPhoto = async (userId) => {
+    
+    if (!userId) return "/default.png";
+    if (photoCache.has(userId)) return photoCache.get(userId);
+
+    try {
+      const response = await fetch(`${backendUrl}/api/user/${userId}/photo`);
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          photoCache.set(userId, "/default.png");
+          return "/default.png";
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success && data.data?.url) {
+        const fullUrl = `${backendUrl}${data.data.url}`;
+        photoCache.set(userId, fullUrl);
+        return fullUrl;
+      }
+      photoCache.set(userId, "/default.png");
+      return "/default.png";
+    } catch (error) {
+      console.error(`Erro ao buscar foto do usuário ${userId}:`, error.message);
+      photoCache.set(userId, "/default.png");
+      return "/default.png";
+    }
+  };
+
+
   return {
     user,
     setUser,
@@ -162,6 +195,7 @@ export const useAuth = () => {
     register,
     createTemporaryUser,
     uploadPhoto,
+    getUserPhoto,
     deletePhoto,
     logout,
     isAuthenticated: user?.isLogged || false
