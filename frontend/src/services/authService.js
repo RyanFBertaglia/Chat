@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useContext } from 'react';
 
 export default class AuthService {
     constructor() {
-        this.baseUrl = 'http://localhost:3000/api';
+        this.baseUrl = `${import.meta.env.BACKEND_URL}/api`;
     }
 
     async login(nome, senha) {

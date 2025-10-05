@@ -1,4 +1,4 @@
-const backendUrl = "http://localhost:3000";
+const backendUrl = import.meta.env.BACKEND_URL;
 
 export const messageService = {
   async fetchMessages() {
