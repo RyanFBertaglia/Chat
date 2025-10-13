@@ -1,5 +1,7 @@
 {
   "name": "chat",
+  "author": "Ryan Fernandes Bertaglia",
+  "description": "Aplicativo de chat desenvolvido com Electron e React",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -47,6 +49,11 @@
     "win": {
       "target": "nsis",
       "icon": "public/messages.ico"
+    },
+    "nsis": {
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true
     }
   }
 }
