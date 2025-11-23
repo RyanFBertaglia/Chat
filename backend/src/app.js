@@ -4,6 +4,7 @@ const socketIo = require('socket.io');
 const path = require('path');
 const cors = require('cors');
 const multer = require('multer');
+const client = require('prom-client');
 
 const commentService = require('./services/commentService');
 const authService = require('./services/authService');
@@ -20,6 +21,8 @@ const io = socketIo(server, {
     methods: ["GET", "POST"]
   }
 });
+
+client.collectDefaultMetrics();
 
 const upload = multer({
     storage: multer.memoryStorage(),
@@ -56,6 +59,12 @@ app.post('/api/register', async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 });
+
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', client.register.contentType);
+  res.send(await client.register.metrics());
+});
+
 
 app.post('/api/login', async (req, res) => {
   try {
