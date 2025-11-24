@@ -3,7 +3,7 @@
   "author": "Ryan Fernandes Bertaglia",
   "description": "Aplicativo de chat desenvolvido com Electron e React",
   "private": true,
-  "version": "1.0.4",
+  "version": "1.0.5",
   "type": "module",
   "main": "electron/main.js",
   "scripts": {
