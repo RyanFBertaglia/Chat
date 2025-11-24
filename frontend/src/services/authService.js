@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useContext } from 'react';
 
 export default class AuthService {
     constructor() {
-        this.baseUrl = `${import.meta.env.BACKEND_URL}/api`;
+        this.baseUrl = `${import.meta.env.VITE_BACKEND_URL}/api`;
     }
 
     async login(nome, senha) {
@@ -88,7 +88,8 @@ export default class AuthService {
             });
 
             if (!response.ok) {
-                throw new Error('Erro ao fazer upload da foto');
+                console.log(response.message)
+                throw new Error('Erro ao fazer upload da foto', response);
             }
 
             return await response.json();

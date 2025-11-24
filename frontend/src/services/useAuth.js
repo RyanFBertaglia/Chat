@@ -2,7 +2,13 @@ import AuthService from "./authService";
 import { AuthContext } from "../AuthContext";
 import { useEffect, useRef, useContext } from 'react';
 
+const photoCache = globalThis.photoCache || new Map();
+globalThis.photoCache = photoCache;
+
+
 export const useAuth = () => {
+  
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const { user, login: contextLogin, setUser, logout: contextLogout } = useContext(AuthContext);
   const authService = useRef(new AuthService()).current;
 
