@@ -40,18 +40,18 @@ app.on('window-all-closed', () => {
 });
 
 autoUpdater.on("update-available", (info) => {
-  curWindow.showMessage(`Update available. Current version ${app.getVersion()}`);
+  mainWindow.showMessage(`Update available. Current version ${app.getVersion()}`);
   let pth = autoUpdater.downloadUpdate();
-  curWindow.showMessage(pth);
+  mainWindow.showMessage(pth);
 });
 
 autoUpdater.on("update-not-available", (info) => {
-  curWindow.showMessage(`No update available. Current version ${app.getVersion()}`);
+  mainWindow.showMessage(`No update available. Current version ${app.getVersion()}`);
 });
 
 /*Download Completion Message*/
 autoUpdater.on("update-downloaded", (info) => {
-  curWindow.showMessage(`Update downloaded. Current version ${app.getVersion()}`);
+  mainWindow.showMessage(`Update downloaded. Current version ${app.getVersion()}`);
 });
 
 
