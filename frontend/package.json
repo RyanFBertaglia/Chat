@@ -55,6 +55,14 @@
       "target": "nsis",
       "icon": "public/messages.ico"
     },
+    "mac": {
+      "target": "dmg",
+      "icon": "assets/icon.icns"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "assets/icon.png"
+    },
     "nsis": {
     "oneClick": false,
     "perMachine": false,
