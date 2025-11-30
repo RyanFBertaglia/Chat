@@ -1,0 +1,28 @@
+# Pastas e arquivos a serem ignorados
+*
+!package.json
+!package-lock.json
+!vite.config.*
+!eslint.config.*
+!index.html
+!src/
+!public/
+!dist/
+!.env
+
+# Dentro do src e public, manter tudo
+src/*
+!src/**/*
+public/*
+!public/**/*
+
+# Ignorar tudo que não é necessário
+node_modules
+.git
+.gitignore
+electron/
+release/
+.DS_Store
+*.log
+coverage
+.nyc_output

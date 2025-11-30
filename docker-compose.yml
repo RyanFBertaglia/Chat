@@ -1,0 +1,111 @@
+version: '3.9'
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/prometheus/rules:/etc/prometheus/rules
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--web.enable-lifecycle'
+    ports:
+      - "9090:9090"
+    networks:
+      - chat-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./monitoring/grafana:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    depends_on:
+      - prometheus
+    networks:
+      - chat-network
+
+  backend-service:
+    container_name: backend-service
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=mysql-db
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=chat
+    depends_on:
+      - mysql
+    networks:
+      - chat-network
+
+  chat:
+    container_name: chat
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      - VITE_BACKEND_URL=http://backend-service:3000
+    ports:
+      - "80:80"
+    networks:
+      - chat-network
+
+  mysql:
+    image: mysql:8
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: chat
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysqldata:/var/lib/mysql
+    networks:
+      - chat-network
+
+  mysql-exporter:
+    image: prom/mysqld-exporter:v0.14.0
+    container_name: mysql_exporter
+    ports:
+      - "9104:9104"
+    environment:
+      - DATA_SOURCE_NAME=root:root@(mysql-db:3306)/chat
+    command:
+      - "--no-collect.slave_status"
+    depends_on:
+      - mysql
+    networks:
+      - chat-network
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:latest
+    container_name: nginx_exporter
+    command:
+      - "-nginx.scrape-uri=http://chat:80/stub_status"
+    ports:
+      - "9113:9113"
+    depends_on:
+      - chat
+    networks:
+      - chat-network
+
+networks:
+  chat-network:
+    driver: bridge
+
+volumes:
+  mysqldata:
+
+# Prometheus → http://localhost:9090
+# Regras → http://localhost:9090/rules
+# Alertas → http://localhost:9090/alerts
+# Grafana → http://localhost:3001
