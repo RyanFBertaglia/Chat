@@ -17,7 +17,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "http://localhost"],
     methods: ["GET", "POST"]
   }
 });
@@ -39,7 +39,7 @@ const upload = multer({
 });
 
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: ["http://localhost:5173", "http://localhost"],
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
@@ -60,6 +60,7 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
+client.collectDefaultMetrics({ prefix: "backend_" });
 app.get('/metrics', async (req, res) => {
   res.set('Content-Type', client.register.contentType);
   res.send(await client.register.metrics());
@@ -88,7 +89,8 @@ app.post('/api/login-temporario', async (req, res) => {
 
 app.get('/api/messages', async (req, res) => {
   try {
-    const messages = await commentService.getMessages();
+    const offset = parseInt(req.query.offset) || 0;
+    const messages = await commentService.getMessages(offset);
     res.json(messages);
   } catch (err) {
     res.status(500).json({ error: err.message });
