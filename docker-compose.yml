@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   prometheus:
     image: prom/prometheus:latest
@@ -57,6 +55,8 @@ services:
       - VITE_BACKEND_URL=http://backend-service:3000
     ports:
       - "80:80"
+    volumes:
+      - ./logs:/var/log/nginx:rw    # bind mount local para logs
     networks:
       - chat-network
 
@@ -86,13 +86,19 @@ services:
       - mysql
     networks:
       - chat-network
-  nginx-exporter:
-    image: nginx/nginx-prometheus-exporter:latest
-    container_name: nginx_exporter
-    command:
-      - "-nginx.scrape-uri=http://chat:80/stub_status"
+
+  nginxlog-exporter:
+    image: quay.io/martinhelmich/prometheus-nginxlog-exporter:v1.10.0
+    container_name: nginxlog_exporter
     ports:
-      - "9113:9113"
+      - "9113:4040"
+    volumes:
+      - ./logs:/var/log/nginx:ro
+      - ./geoip:/geoip:ro
+      - ./monitoring/nginxlog-exporter:/etc/nginxlog-exporter:ro
+    command:
+      - -config-file
+      - /etc/nginxlog-exporter/config.hcl
     depends_on:
       - chat
     networks:
