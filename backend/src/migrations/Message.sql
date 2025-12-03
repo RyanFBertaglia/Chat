@@ -1,6 +1,6 @@
 CREATE TABLE message (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    idUser INT NOT NULL,
+    idUser CHAR(36) NOT NULL,
     content TEXT NOT NULL,
     message_type ENUM('text', 'image', 'file') DEFAULT 'text',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

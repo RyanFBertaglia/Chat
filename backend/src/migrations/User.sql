@@ -1,6 +1,5 @@
 CREATE TABLE user (
     id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
-    idUser CHAR(36) NOT NULL,
     name VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     is_temporary TINYINT(1) DEFAULT 0,
