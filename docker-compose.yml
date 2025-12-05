@@ -56,7 +56,8 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./logs:/var/log/nginx:rw    # bind mount local para logs
+      - ./logs:/var/log/nginx:rw
+      - ./geoip:/geoip:ro
     networks:
       - chat-network
 
@@ -88,28 +89,24 @@ services:
       - chat-network
 
   nginxlog-exporter:
-    image: quay.io/martinhelmich/prometheus-nginxlog-exporter:v1.10.0
-    container_name: nginxlog_exporter
+    image: nginx/nginx-prometheus-exporter:0.11.0
+    container_name: nginx_exporter
     ports:
-      - "9113:4040"
-    volumes:
-      - ./logs:/var/log/nginx:ro
-      - ./geoip:/geoip:ro
-      - ./monitoring/nginxlog-exporter:/etc/nginxlog-exporter:ro
+    - "9113:4040"
     command:
-      - -config-file
-      - /etc/nginxlog-exporter/config.hcl
+    - -nginx.scrape-uri=http://chat/nginx_status
     depends_on:
-      - chat
+    - chat
     networks:
-      - chat-network
+    - chat-network
 
 networks:
-  chat-network:
+  chat-network: 
     driver: bridge
 
 volumes:
   mysqldata:
+  portainer_data:
 
 # Prometheus → http://localhost:9090
 # Regras → http://localhost:9090/rules
