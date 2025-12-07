@@ -1,0 +1,5 @@
+monitoring/* linguist-generated=true
+*.log linguist-generated=true
+*.json linguist-generated=true
+*.png linguist-documentation=true
+readme.md linguist-documentation=true

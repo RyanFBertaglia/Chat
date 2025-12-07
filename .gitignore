@@ -4,3 +4,5 @@ frontend/node_modules
 annotations.txt
 node_modules
 backend/src/uploads/*
+logs
+monitoring/grafana/*

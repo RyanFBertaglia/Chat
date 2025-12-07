@@ -1,28 +1,34 @@
-# Pastas e arquivos a serem ignorados
-*
+
+# Arquivos essenciais para versionar
 !package.json
 !package-lock.json
 !vite.config.*
 !eslint.config.*
 !index.html
+!.env
+!.gitignore
+
+# Pastas principais
 !src/
 !public/
 !dist/
-!.env
 
-# Dentro do src e public, manter tudo
+# Conteúdo das pastas
 src/*
 !src/**/*
+
 public/*
 !public/**/*
 
+dist/*
+!dist/**/*
+
 # Ignorar tudo que não é necessário
-node_modules
-.git
-.gitignore
+node_modules/
+.git/
 electron/
 release/
 .DS_Store
 *.log
-coverage
-.nyc_output
+coverage/
+.nyc_output/
