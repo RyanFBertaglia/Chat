@@ -6,6 +6,11 @@ const cors = require('cors');
 const multer = require('multer');
 const client = require('prom-client');
 
+const activeUsersGauge = new client.Gauge({
+  name: 'active_users',
+  help: 'Número de usuários ativos no sistema (via Socket.IO)'
+});
+
 const commentService = require('./services/commentService');
 const authService = require('./services/authService');
 
@@ -158,6 +163,7 @@ app.get('/api/user/:userId/photo', async (req, res) => {
 
 io.on('connection', (socket) => {
   console.log('Usuário conectado:', socket.id);
+  activeUsersGauge.inc();
 
   socket.on('send_message', async (data) => {
     try {
@@ -175,6 +181,7 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log('Usuário desconectado:', socket.id);
+    activeUsersGauge.dec();
   });
 });
 
