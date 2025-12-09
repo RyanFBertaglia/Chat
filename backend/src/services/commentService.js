@@ -42,16 +42,17 @@ class CommentService {
 
     async getMessages(limit = 50, offset = 0) {
         const connection = await db.getConnection();
+        let limits = parseInt(limit) || 50;
+        let offsets = parseInt(offset) || 0;
         try {
             const [messages] = await connection.execute(`
                 SELECT m.*, u.name as user_name, u.name as name
                 FROM message m 
                 JOIN user u ON m.idUser = u.id 
                 ORDER BY m.created_at DESC 
-                LIMIT ? OFFSET ?
-            `, [limit, offset]);
-
-            return messages.reverse();
+                LIMIT ${limits} OFFSET ${offsets}
+            `);
+            return messages;
         } finally {
             connection.release();
         }
