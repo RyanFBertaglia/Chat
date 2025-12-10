@@ -1,0 +1,19 @@
+groups:
+  - name: node_js_alerts
+    rules:
+
+      - alert: HighCPU
+        expr: process_cpu_seconds_total{job="chat-backend"} > 0.8
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          description: CPU do Node.js acima de 80%.
+
+      - alert: EventLoopBlocked
+        expr: nodejs_eventloop_lag_seconds > 0.2
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          description: Event loop está travando acima de 200ms.
